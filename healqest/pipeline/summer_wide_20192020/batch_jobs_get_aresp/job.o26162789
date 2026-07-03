@@ -1,0 +1,35 @@
+Loading config
+Using lranget: [500,3000]
+Loading noise+forground stacks
+Load CMB cls
+Computing 1D filter
+Setting lranges in the 1D filter
+Computing analytical resp
+Computing weights
+Saving file: /data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/lensrec_lmin500lmax3000mmin100_summer-a/sqe/aresp/aresp_lminT500_lmaxT3000.npz
+Job ID           : 26162789
+Cluster          : spartan
+User/Project     : levyk/punim1922
+Nodes            : 1
+Wall-clock time  : 00:00:30 / 01:00:00
+
+Displaying overall resources usage from 2026-06-16 02:44:06 to 2026-06-16 02:44:36:
+
+NODE            CPU#        TOT%   ( USR   / SYS   / WIO   / IDLE  ) 
+
+spartan-bm134 : 
+                CPU# 1    : 0.2    (   0.1 /   0.2 /   0.0 /  99.8 ) 
+                CPU# 2    : 0.5    (   0.3 /   0.3 /   0.0 /  99.5 ) 
+                CPU# 3    : 0.2    (   0.1 /   0.2 /   0.0 /  99.8 ) 
+                CPU# 4    : 28.9   (  28.6 /   0.4 /   0.0 /  71.1 ) 
+
+
+Allocated CPUs            : 4    
+  CPUs with usage <25%    : 3    
+  CPUs with usage <50%    : 1    
+  CPUs with usage >50%    : 0    
+
+Memory used (RAM)         : 0.8%  [82MB of 10738MB]
+
+--------------------------------------------
+

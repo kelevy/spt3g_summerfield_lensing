@@ -1,0 +1,58 @@
+base:
+    dir_healqest: '/lcrc/project/SPT3G/users/ac.yomori/repo/healqest/'
+    version     : '112923'
+    dir_sptsoft : '/lcrc/project/SPT3G/users/ac.yomori/repo/spt3g_software_base/spt3g_software_051223/'
+    config_base : '/lcrc/project/SPT3G/users/ac.yomori/repo/spt3g_software_base/spt3g_software_051223/scratch/yomori/midell/main_xover_061322.yaml'
+    runname     : 'lmax3500_mfsubN0_nomfsplit'
+
+cls:
+    file_ucmb: '/lcrc/project/SPT3G/users/ac.yomori/repo/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_lenspotentialCls.dat'
+    file_lcmb: '/lcrc/project/SPT3G/users/ac.yomori/repo/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_lensedCls.dat'
+    file_gcmb: '/lcrc/project/SPT3G/users/ac.yomori/repo/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_gradlensedCls.dat'
+
+lensrec:
+    rectype: 'sqe' # [sqe,gmv,mh,xilc,gmvph]
+    cltype : 'gcmb'
+    Lmax : 4100
+    lminT: 350
+    lmaxT: 3500
+    lminP: 350
+    lmaxP: 4000
+    nside: 2048
+    mmin : 220
+
+resp:
+    input_kappa    : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/sims/inputkappa/inkappa_seed{seed}.alm'
+    aresp          : '../products/resp/analytical_resp_lranget_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}.npz'
+    tmpdir_emmcut  : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/scratch/resp_emmcut_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}/'
+    aresp_mcorr    : '../products/resp/analytical_resp_emmcut_lranget_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}.npz'
+    tmpdir_mc      : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/scratch/resp_mccorr_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}/'
+    aresp_mcorr_mc : '../products/resp/analytical_resp_emmcut_mccorr_lranget_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}.npz'
+    mc             : '../products/resp/mccorr_lranget_{lminT}_{lmaxT}_lrangep_{lminP}_{lmaxP}.npz'
+
+inputs:
+    rawcmb    : '/lcrc/project/SPT3G/users/ac.yomori/sims/planck2018_cmb_v2/len/lensed_planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_cambphiG_teb1_seed{seed}_lmax17000_nside8192_interp1.6_method1_pol_1_lensedmap.fits'
+    alms      : '/lcrc/project/SPT3G/users/ac.yomori/sims/spt3g_lensing_20192020/3.3.1.3.1/mockdata/healpix/cinv_{maptype}/ivf_teb{cmbset}_seed{seed}.alm'
+    alms_N1   : '/lcrc/project/SPT3G/users/ac.yomori/sims/spt3g_lensing_20192020/3.3.1.3.1/mockdata/healpix/cinv_{maptype}/ivf_n1G_teb{cmbset}_seed{seed}.alm'
+    phi_in    : '/lcrc/project/SPT3G/users/ac.yomori/sims/planck2018_cmb_v2/unl/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_cambphiG_phi1_seed{seed}.alm'
+    kappa_in  : '/lcrc/project/SPT3G/users/ac.yomori/sims/spt3g_lensing_20192020/inputkappa/inkappa_seed{seed}.alm'
+    file_mcorr: '/lcrc/project/SPT3G/users/ac.yomori/repo/spt3g_software_base/spt3g_software_051223/scratch/yomori/midell/sims/foregrounds/mcmc/emulator/emmtest2_map2alm/mcorr_map2alm.npz'
+    mmin      : 220
+    bmask     : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/masks/border_apod_mask_threshold0.1_allghz_dense.fits'    
+    pmask     :
+    fmask     : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/masks/mask2048_border_apod_mask_threshold0.1_allghz_dense_1500d_eetelensing-1920_mapmaking_mask_list_fluxcut6mJy_clusterSNcut10_dense.fits'
+    nfgstack  : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/almstack/ilc/noisefg2_tqu1_agora0.7_datamatched_mcmccal_0707231033_Coadd_allfields_cmbmv_1_500_withsignflipnoise_2dilc_full.npz'
+
+outputs:
+    dir_out : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/{version}/{rectype}/lmaxt{lmaxT}/'
+    dir_out_N1: '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/{version}/{rectype}_N1G/lmaxt{lmaxT}/'
+
+pspec:
+    dir_tmp  : '/tmp/'
+    dir_cls  : '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/{version}/{rectype}/lmaxt3500/'
+    dir_cls_N1: '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/{version}/{rectype}_N1G/lmaxt3500/'
+    file_mask: '/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/masks/mask2048_border_apod_mask_threshold0.1_allghz_dense_1500d_eetelensing-1920_mapmaking_mask_list_fluxcut6mJy_clusterSNcut10.fits'
+    lmax     : 4000
+    thetamax : 25
+    apodizesigma: 30
+    tolerance: 1e-8 

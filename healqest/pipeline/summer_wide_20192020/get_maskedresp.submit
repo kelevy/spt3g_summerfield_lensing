@@ -1,0 +1,44 @@
+#!/bin/bash
+#SBATCH --job-name=maskedresp
+#SBATCH --time=6:00:00
+#SBATCH --partition=SPT3G
+#SBATCH --account=SPT3G
+#SBATCH --array=1-250:10%14
+#SBATCH -N 1
+
+source deactivate
+source /lcrc/project/SPT3G/users/ac.yomori/setups/setup_analysis.sh
+
+k=$SLURM_ARRAY_TASK_ID
+
+#dir_p=/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/081024/gmvjtp/lmin350_lmaxt3500_lmaxp4000_mmin130_crosstf_MASKED/GMV/
+#dir_out=resp_3500_081024_gmv_crosstf_MASKED
+#qe=GMV
+#nsims=20
+
+qe=TT
+dir_p=/lcrc/project/SPT3G/users/ac.yomori/projects/spt3g_lensing_20192020/lensrec/sqe081024/sqe/autotf_v2_lmint350_lminp350_lmaxt3500_lmaxp4000_mmin130/${qe}/
+dir_out=resp_3500_081024_sqeeb_mmin300
+nsims=250
+
+#rm -rf ${dir_out}
+
+for ((c=$k;c<$(($k+10));c++));
+do
+python src/get_maskedresp.py $dir_p $dir_out $qe $nsims $c --usespice
+
+if [ $c -eq $nsims ]; then
+# Collect and merge
+echo "#!/bin/bash" > submit
+echo "#SBATCH --job-name=maskedresp-merge" >> submit
+echo "#SBATCH --time=6:00:00" >> submit
+echo "#SBATCH --partition=SPT3G" >> submit
+echo "#SBATCH --account=SPT3G" >> submit
+echo "#SBATCH -N 1" >> submit
+echo "#SBATCH --dependency=afterok:$SLURM_JOB_ID" >> submit
+echo /lcrc/project/SPT3G/users/ac.yomori/setups/setup_analysis.sh >> submit
+echo python src/get_maskedresp.py  $dir_p $dir_out $qe $nsims $c --merge --usespice >> submit
+sbatch submit
+fi
+
+done

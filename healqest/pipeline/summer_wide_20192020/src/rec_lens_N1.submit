@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH --job-name=reclens
+#SBATCH --time=1:00:00
+#SBATCH --partition=SPT3G
+#SBATCH --account=SPT3G
+#SBATCH --array=1-102:2%17
+#SBATCH -N 1
+
+source deactivate
+source /lcrc/project/SPT3G/users/ac.yomori/setups/setup_analysis.sh
+
+
+k=$SLURM_ARRAY_TASK_ID
+
+for ((c=$k;c<$(($k+2));c++));
+do
+i=$(($c+0))
+j=$(($c+1))
+cmbset1=1
+cmbset2=1
+cmbset3=2
+yaml=config_112923_lmax3500.yaml
+python rec_lens.py ${yaml} $i $cmbset1 $j $cmbset2 --N1 # x y
+python rec_lens.py ${yaml} $j $cmbset1 $i $cmbset2 --N1 # y x
+python rec_lens.py ${yaml} $i $cmbset1 $i $cmbset3 --N1 # a b
+python rec_lens.py ${yaml} $i $cmbset3 $i $cmbset1 --N1 # b a
+done

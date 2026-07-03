@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --account="punim1922"
+#SBATCH --output=batch_jobs_apply_cinv_T_approx/job.o%j
+#SBATCH --time=0:30:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --array=0-250
+
+
+j=$SLURM_ARRAY_TASK_ID
+
+yaml=yaml/sqe/config_sqe_lensrec_summer-c_full_lminT500_lmaxT3000_mmin100.yaml
+
+python src/apply_cinv_T_approx.py --seed $j --config_file ${yaml}
+
+my-job-stats -a -n -s

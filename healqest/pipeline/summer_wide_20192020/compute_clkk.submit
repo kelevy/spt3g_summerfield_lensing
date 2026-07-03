@@ -1,0 +1,42 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --output=batch_jobs_compute_clkk/job.o%j
+#SBATCH --time=2:0:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --job-name=compute_clkk
+#SBATCH --array=0-248
+
+yaml=yaml/sqe/config_sqe_lensrec_summer-a_full_lminT500_lmaxT3000_mmin100.yaml
+
+qe=TT # TT/qPP/qMV
+
+dataseed=0
+i=$(($SLURM_ARRAY_TASK_ID))
+
+
+############# grad mode ###################
+if [ $i -eq 0 ]; then
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --xx --mfsub --mfsplit 
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --MF --mfsplit 
+fi
+if [ $i -gt 0 ]; then
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --xx --mfsub --mfsplit 
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --N0 --mfsub --mfsplit
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --RDN0 --mfsub --mfsplit
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --N1_sep --mfsub --mfsplit
+fi 
+
+############# curl Mode ###################
+if [ $i -eq 0 ]; then
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --xx --mfsub --mfsplit --curl
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --MF --curl
+fi
+if [ $i -gt 0 ]; then
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --xx --mfsub --mfsplit --curl
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --N0 --mfsub --mfsplit --curl
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --RDN0 --mfsub --mfsplit --curl
+python src/compute_clkk.py $yaml ${qe} $i $dataseed --N1_sep --mfsub --mfsplit --curl
+fi

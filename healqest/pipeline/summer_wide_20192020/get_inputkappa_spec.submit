@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --account="punim1922"
+#SBATCH --output=batch_jobs_get_inputkappa_spec/job.o%j
+#SBATCH --time=1:0:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+
+yaml=yaml/sqe/config_sqe_030425_sims_summer-c_full_lminT500_lmaxT3500_mmin100.yaml
+
+python src/get_inputkappa_spec.py #--config_file ${yaml}
+
+my-job-stats -a -n -s

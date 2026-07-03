@@ -1,0 +1,40 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --account="punim1922"
+#SBATCH --output=batch_jobs_rec_lens_sqe_masked/job.o%j
+#SBATCH --job-name=reclens
+#SBATCH --time=3:00:00
+#SBATCH --mem=10G
+#SBATCH --cpus-per-task=4
+#SBATCH --array=0-250
+
+didx=0
+j=$SLURM_ARRAY_TASK_ID
+k=$(($SLURM_ARRAY_TASK_ID+1))
+
+cmbset1=1
+cmbset2=2
+
+
+yaml=yaml/sqe/config_sqe_lensrec_summer-c_full_lminT500_lmaxT3000_mmin100.yaml
+
+
+if [ $j -eq 0 ]; then
+python src/rec_lens_masked.py ${yaml} $didx $cmbset1 $didx $cmbset1
+fi
+if [ $j -gt 0 ]; then
+python src/rec_lens_masked.py ${yaml} $j $cmbset1 $j $cmbset1 
+python src/rec_lens_masked.py ${yaml} $j $cmbset1 $k $cmbset1  
+python src/rec_lens_masked.py ${yaml} $k $cmbset1 $j $cmbset1 
+python src/rec_lens_masked.py ${yaml} $j $cmbset1 $didx $cmbset1  
+python src/rec_lens_masked.py ${yaml} $didx $cmbset1 $j $cmbset1 
+fi
+
+# computing plms for N1 seperatly
+if [ $j -gt 0 ]; then
+python src/rec_lens_masked_N1.py ${yaml} $j $cmbset1 $j $cmbset1 # xx
+python src/rec_lens_masked_N1.py ${yaml} $j $cmbset1 $k $cmbset1 # xy 
+python src/rec_lens_masked_N1.py ${yaml} $k $cmbset1 $j $cmbset1 # yx
+python src/rec_lens_masked_N1.py ${yaml} $j $cmbset1 $j $cmbset2 # ab
+python src/rec_lens_masked_N1.py ${yaml} $j $cmbset2 $j $cmbset1 # ba
+fi

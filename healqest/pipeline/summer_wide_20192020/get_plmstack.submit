@@ -1,0 +1,42 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --output=batch_jobs_get_plmstack_resp/job.o%j
+#SBATCH --time=2:0:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+#SBATCH --job-name=get_plmstack_resp
+
+
+yaml=yaml/sqe/config_sqe_lensrec_summer-a_full_lminT500_lmaxT3000_mmin100.yaml
+
+
+
+qeidx=$(($SLURM_ARRAY_TASK_ID+0))
+
+dataidx=0
+nsims=148
+
+# get MF for signal
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getxx
+
+# get MF for N0
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getxy  # computes xy and yx
+
+# get MF for RDN0
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getxd  # computes xd and dx
+
+#get total response
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getresp
+
+# get MF for N1
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getxx_N1  # compute xx for N1 separately
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getxy_N1  # computes xy and yx for N1 seperately
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getab_N1  # computes ab and ba for N1 seperately
+
+# get seperate total response for N1
+python src/get_plmstack.py ${yaml} $qeidx $nsims $dataidx --getresp_N1_sep
+
+
+

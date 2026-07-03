@@ -1,0 +1,78 @@
+base:
+    dir_healqest: '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/'
+    runname     : 'lensrec_lmin500lmax3500mmin300_summer-c'
+
+cls:
+    file_ucmb   : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_lenspotentialCls.dat'
+    file_lcmb   : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_lensedCls.dat'
+    file_gcmb   : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/healqest/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_gradlensedCls.dat'
+
+cinv_approx:
+    lminT         : 500
+    lmaxT         : 3500
+    file_cambcls  : '/data/gpfs/projects/punim1922/summerfield_lensing/sims/cmb/spectra/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_lensedCls.dat'
+    file_clnoise  : '/data/gpfs/projects/punim1922/summerfield_lensing/ilc/spectra/cl_residual_arr_cmbmv_summer_c.dat'
+    file_clfg     : '/data/gpfs/projects/punim1922/summerfield_lensing/sims/foregrounds/spectra/cls_nofg_nofg.dat'
+    file_in       : '/data/gpfs/projects/punim1922/summerfield_lensing/ilc/maps/len/cmbmv/data/bundle{bundleid}/cmbmv_tqu1_lmax4000_summer_c_seed{seed}.alm'
+    file_in_N1    : '/data/gpfs/projects/punim1922/summerfield_lensing/ilc/maps/N1/cmbmv/sims/bundle0/cmbmv_tqu{cmbset}_lmax4000_summer_c_seed{seed}.alm'
+    file_out      : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/almbars/bundle{bundleid}/cmbmv_tqu1_almbar_lminT{lminT}_lmaxT{lmaxT}_summer-c_seed{seed}.npz'
+    file_out_N1   : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/almbars/N1/N1_tqu{cmbset}_almbar_lminT{lminT}_lmaxT{lmaxT}_summer-c_seed{seed}.npz'
+
+lensrec:
+    rectype: 'sqe' # [sqe,gmv,mh,xilc,gmvph]
+    qesttype: 'TT'  
+    cltype : 'gcmb'
+    lminT  : 500
+    lmaxT  : 3500
+    lminP  : 0  
+    lmaxP  : 0
+    lminB  :
+    nside  : 2048
+    mmin   : 300
+    Lmax   : 3500 
+    apply_emmtf: False
+    pstf   : True
+    notch : 
+    aresp: '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/aresp/aresp_lminT{lminT}_lmaxT{lmaxT}.npz'  
+    dir_out : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/plms/bundle{bundleid1}Xbundle{bundleid2}/' 
+    dir_out_N1 : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/plms/N1/'
+
+inputs:
+    phi_in    : '/data/gpfs/projects/punim1922/summerfield_lensing/sims/phi/maps/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_cambphiG_phi1_seed{seed}.alm'
+    kappa_in  : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/kappa_in/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_cambphiG_kappa1_summer-c_seed{seed}.alm'  
+    field: 'summer-a'
+    lmax: 3500
+    nside: 2048
+    mask_file: '/data/gpfs/projects/punim1922/summerfield_lensing/data/masks/apod_mask_45arcmin_summer-c.fits'
+   
+pspec:
+    dir_kmaps     : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/kmaps/'
+    mask_boundary : '/data/gpfs/projects/punim1922/summerfield_lensing/data/masks/apod_mask_45arcmin_summer-c.fits' 
+    mask_analysis : '/data/gpfs/projects/punim1922/summerfield_lensing/data/masks/apod_mask_45arcmin_15arcmin_summer-c_20mJy.fits' 
+    nlmax         : 3500
+    nside         : 2048 
+    thetamax      : 60
+    apodizesigma  : 30
+    apodizetype   : 0
+    subav         : True
+    psname        : ''  
+    auto          : True
+    cross         : False
+    polspice      : False
+    dir_pspec     : '/data/gpfs/projects/punim1922/summerfield_lensing/healqest/lensrec/{runname}/{rectype}/spectra/' 
+
+like:
+    nsims1      : 498       # Number of sims for xx,N0,RDN0 
+    nsims2      : 248       # Number of sims for N1
+    Lmin        : 20        # Lmin 
+    Lmax        : 2000      # Lmax
+    nbins       : 18        # Number of bins
+
+    # Fiducial Cls without ell factors
+    fid_cls     : '/data/gpfs/projects/punim1922/spt3g_software/spt3g_software_051223/scratch/yomori/midell/sims/lensed_cmb/camb/planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_rawCls.pickle'
+
+    # Random string that determines the blinding factor
+    blind_str   : 'london'
+
+    # Output likelihood file
+    dir_like    : './likelihood/20192020/data/'

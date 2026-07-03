@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --account="punim1922"
+#SBATCH --output=batch_jobs_get_inputkappa/job.o%j
+#SBATCH --time=0:10:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=25G
+#SBATCH --array=1-250
+
+j=$SLURM_ARRAY_TASK_ID
+
+yaml=yaml/sqe/config_sqe_lensrec_summer-c_full_lminT500_lmaxT3000_mmin100.yaml
+
+python src/get_inputkappa.py --seed $j --config_file ${yaml}
+
+my-job-stats -a -n -s
