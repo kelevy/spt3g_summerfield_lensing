@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --partition=sapphire
+#SBATCH --account="punim1922"
+#SBATCH --output=batch_create_mask/job.o%j
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+#SBATCH --time=0:30:00
+#SBATCH --mem=25G
+
+export SHELL=bash
+
+
+python create_mask.py # --label_out 'summer12_' --label_sources '_PLAclusters' --nside 2048
+
+
+my-job-stats -a -n -s

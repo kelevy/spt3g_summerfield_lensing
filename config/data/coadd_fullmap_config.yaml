@@ -1,0 +1,21 @@
+# Parameters for coadding maps.
+# Used in conjunction with coadder.py.
+
+# Comment
+hh: 0
+mm: 30
+memory: 10
+nodes: 1
+
+which_field: 'summer-a'
+
+
+######################################################################################################################
+
+
+fd_python_files: "/data/gpfs/projects/punim1922/summerfield_lensing/sims/python/files/"
+fd_spt3g_software: "/data/gpfs/projects/punim1922/spt3g_software/build/"
+
+mock_obs_fd_pref: '/data/gpfs/projects/punim1922/summerfield_lensing/data/coadds/signal/maps/which_field/YY/'
+result_dir: '/data/gpfs/projects/punim1922/summerfield_lensing/data/coadds/signal/maps/which_field/full/' 
+result_file: 'no_signflip_bundle_000.g3.gz'
