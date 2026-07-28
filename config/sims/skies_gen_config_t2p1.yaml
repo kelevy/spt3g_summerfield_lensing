@@ -1,0 +1,53 @@
+# Parameters for sim generation.
+
+
+######################################################################################################################
+
+
+# HPC stuff
+hh: 48
+mm: 00
+nodes: 1
+ntasks: 1
+cpus_per_task: 1
+memory: 100
+
+
+######################################################################################################################
+
+
+# frequencies
+freq_arr: [150]
+
+# seeds
+start: 85
+end: 85
+
+
+######################################################################################################################
+
+
+# File Locations
+
+# batch jobs
+batch_jobs_folder: '/data/gpfs/projects/punim1922/summerfield_lensing/sims/codes/batch_jobs_sims_t1p1/'
+
+# script location
+script_loc: '/data/gpfs/projects/punim1922/summerfield_lensing/sims/codes/'
+script_file: 'skies_gen.py'
+
+# sim folders for output and to copy from argonne xover
+loc_dic_fg_argonne: '/lcrc/project/SPT3G/users/ac.yomori/sims/'
+loc_dic_cmb_argonne: '/lcrc/project/SPT3G/users/ac.yomori/sims/' 
+op_fd: '/data/gpfs/projects/punim1922/summerfield_lensing/sims/skies/'
+cmb_sim_fd_suff: 'planck2018_cmb_v2/len/'
+fname_dic_cmb: 'lensed_planck2018_base_plikHM_TTTEEE_lowl_lowE_lensing_cambphiG_teb1_seedseedval_lmax17000_nside8192_interp1.6_method1_pol_1_lensedmap.fits'
+fg_sim_fd_suff: 'spt3g_lensing_20192020/foreground/datamatched_mcmccal_0707231033/'
+fname_dic_fg: 'totfg_nuvalghz_seedseedval.fits'
+opfname_pref: 'mockobsinput_tqu1_agora0.7_datamatched_mcmccal_0707231033_nuvalghz_seedseedval.fits'
+
+# beams
+beam_file: '/data/gpfs/projects/punim1922/summerfield_lensing/data/beams/compiled_2020_beams.txt'
+
+# mask
+mask_file: '/data/gpfs/projects/punim1922/summerfield_lensing/data/masks/10oct2022_widemask_summer-all.fits'
