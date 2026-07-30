@@ -1,0 +1,18 @@
+# Parameters for coadding maps.
+# Used in conjunction with coadder.py.
+
+# Comment
+hh: 0
+mm: 30
+memory: 10
+nodes: 1
+
+
+######################################################################################################################
+
+
+fd_python_files: "/data/gpfs/projects/punim1922/summerfield_lensing/sims/python/files/"
+fd_spt3g_software: "/data/gpfs/projects/punim1922/spt3g_software/build/"
+
+mock_obs_fd_pref: '/data/gpfs/projects/punim1922/summerfield_lensing/ilc/maps/cmbmv/data/bundlebundleid/'
+result_dir: '/data/gpfs/projects/punim1922/summerfield_lensing/ilc/maps/full/cmbmv/data/bundle0/' 
