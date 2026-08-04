@@ -34,11 +34,13 @@ parser.add_argument("--mfsub", default=False, dest="mfsub", action="store_true")
 parser.add_argument("--curl", default=False, dest="curl", action="store_true")
 parser.add_argument("--alm2cl", default=False, dest="alm2cl", action="store_true")
 parser.add_argument("--nops", default=False, dest="nops", action="store_true")
+parser.add_argument("--combine_mf", default=False, dest="combine_mf", action="store_true")
 
 
 args         = parser.parse_args()
 qeset        = args.qeset
 seed         = args.seed
+nber_bundles = 1
 prftype      = args.prftype
 xx           = args.xx
 N0           = args.N0
@@ -55,6 +57,7 @@ curl         = args.curl
 alm2cl       = args.alm2cl
 nops         = args.nops
 mfsubxx      = True
+combine_mf   = args.combine_mf
 
 
 
@@ -79,7 +82,7 @@ def polspice(map1, map2=None, mask=None, nlmax=3500, apodizesigma=30, thetamax=3
                             verbose=True)
 
 
-def compute_cls(config, seed, ktype="xxxx", sep=False):
+def compute_cls(config, seed, ktype="xxxx", bundleid1=None, bundleid2=None):
     """
     Compute power spectra using alm2cl or PolSpice.
 
@@ -131,12 +134,12 @@ def compute_cls(config, seed, ktype="xxxx", sep=False):
     ii, jj, xx, yy = ktype_map.get(ktype, ("", "", "", ""))
 
     # Temporary map files
-    if sep:
+    if bundleid1 is None and bundleid2 is None:
         file_1 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "N1/kmap%s_%s_%d_1.fits" % (ktype[:2], qid, i)
         file_2 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "N1/kmap%s_%s_%d_2.fits" % (ktype[2:], qid, i)
     else:
-        file_1 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "/kmap%s_%s_%d_1.fits" % (ktype[:2], qid, i)
-        file_2 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "/kmap%s_%s_%d_2.fits" % (ktype[2:], qid, i)
+        file_1 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "kmap%s_%s_%d_1.fits" % (ktype[:2], qid, i)
+        file_2 = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) + "kmap%s_%s_%d_2.fits" % (ktype[2:], qid, i)
     file_mask = config["pspec"]["mask_analysis"]
 
     map1 = hp.read_map(file_1)
@@ -155,7 +158,7 @@ def compute_cls(config, seed, ktype="xxxx", sep=False):
         tmp = np.c_[np.arange(config["pspec"]["nlmax"] + 1), cls].T
 
         dir_pspec = config["pspec"]["dir_pspec"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"])+"healpy/"
-        if sep: 
+        if bundleid1 is None and bundleid2 is None: 
             dir_pspec = dir_pspec+'N1/'
         else:
             dir_pspec = dir_pspec
@@ -177,10 +180,10 @@ def compute_cls(config, seed, ktype="xxxx", sep=False):
 
 
         dir_pspec = config["pspec"]["dir_pspec"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"])+"polspice/"
-        if sep: 
+        if bundleid1 is None and bundleid2 is None: 
             dir_pspec = dir_pspec+'N1/'
         else:
-            dir_pspec = dir_pspec
+            dir_pspec = dir_pspec+'bundle%sXbundle%s/'%(bundleid1,bundleid2)
         pathlib.Path(dir_pspec).mkdir(parents=True, exist_ok=True)
     
         np.savez(dir_pspec+"cl%s_%s_%s_%s_%s_%s.npz" % (gcid, qid, ii, jj, xx, yy),cls=tmp,**psconfig)
@@ -247,7 +250,7 @@ def process_mf(seed, plm, plmstack, mfsplit, ktype, gcmode):
 
     return mf
 
-def get_kmap(config, seed, ktype="xx", mapnum=1, sep=False):
+def get_kmap(config, seed, ktype="xx", mapnum=1, bundleid=None):
     """
     Create kappa map given plms, response and meanfield
 
@@ -314,7 +317,7 @@ def get_kmap(config, seed, ktype="xx", mapnum=1, sep=False):
     respmv = 0
 
     for qe in qes:
-        if sep:
+        if bundleid is None:
             dir_plm = config["lensrec"]["dir_out_N1"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"]) 
         else:
             dir_plm = config["lensrec"]["dir_out"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"])
@@ -333,8 +336,8 @@ def get_kmap(config, seed, ktype="xx", mapnum=1, sep=False):
             file_plmstack = dir_plm + f"{gcmode}lmstack{qe}_{ktype}_dataidx{t}.npz"
         else:
             file_plmstack = dir_plm + f"{gcmode}lmstack{qe}_{ktype}.npz"
-            if ktype == "xx":
-                file_plmstack = dir_plm + f"{gcmode}lmstack{qe}_xx.npz" 
+            if config["pspec"]["combine_mf"] and ktype == "xx":
+                file_plmstack = dir_plm + f"{gcmode}lmstack{qe}_xx.npz"  #xxyy.npz"
 
         print(f"Loading plm     : {file_plm}")
         print(f"Loading plmstack: {file_plmstack}")
@@ -371,7 +374,7 @@ def get_kmap(config, seed, ktype="xx", mapnum=1, sep=False):
     
     
     kmaps_dir = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"])
-    if sep: 
+    if bundleid is None: 
         kmaps_dir = kmaps_dir+'N1/'
     else:
         kmaps_dir = kmaps_dir
@@ -425,13 +428,13 @@ def get_maskfac(config):
 
     nside = hp.npix2nside(ma.shape[0])
 
-    if config["lensrec"]["mask"] is not None:
-        if "inverse" in config["lensrec"]["mask"]:
-            mr = hp.read_map(config["lensrec"]["mask"], partial=True)
+    if config["pspec"]["mask_analysis"] is not None:
+        if "inverse" in config["pspec"]["mask_analysis"]:
+            mr = hp.read_map(config["pspec"]["mask_analysis"], partial=True)
             mr[mr == hp.UNSEEN] = 0
             mr = 1 - mr
         else:
-            mr = hp.read_map(config["lensrec"]["mask"])
+            mr = hp.read_map(config["pspec"]["mask_analysis"])
 
         if hp.npix2nside(len(mr)) != nside:
             mr = hp.ud_grade(mr, nside_out=nside)
@@ -449,7 +452,7 @@ def get_maskfac(config):
     return maskfac
 
 
-def cleanup(config, seed, sep=False):
+def cleanup(config, seed, nber_bundles=None):
     """
     Remove all temporary files.
 
@@ -467,16 +470,17 @@ def cleanup(config, seed, sep=False):
     """
     print("Deleting the following files:")
     dir_tmp = config["pspec"]["dir_kmaps"].format(runname=config["base"]["runname"], rectype=config["lensrec"]["rectype"])       
-    if sep:
+    if nber_bundles is None:
         [print(f) for f in Path(dir_tmp+'N1/').glob(f"kmap*_{seed}_1.fits")]
         [print(f) for f in Path(dir_tmp+'N1/').glob(f"kmap*_{seed}_2.fits")]
         [f.unlink() for f in Path(dir_tmp+'N1/').glob(f"kmap*_{seed}_1.fits")]
         [f.unlink() for f in Path(dir_tmp+'N1/').glob(f"kmap*_{seed}_2.fits")]
     else:
-        [print(f) for f in Path(dir_tmp).glob(f"kmap*_{seed}_1.fits")]
-        [print(f) for f in Path(dir_tmp).glob(f"kmap*_{seed}_2.fits")]
-        [f.unlink() for f in Path(dir_tmp).glob(f"kmap*_{seed}_1.fits")]
-        [f.unlink() for f in Path(dir_tmp).glob(f"kmap*_{seed}_2.fits")]
+        for bundleid in range(nber_bundles):
+            [print(f) for f in Path(dir_tmp).glob(f"kmap*_{seed}_1.fits")]
+            [print(f) for f in Path(dir_tmp).glob(f"kmap*_{seed}_2.fits")]
+            [f.unlink() for f in Path(dir_tmp).glob(f"kmap*_{seed}_1.fits")]
+            [f.unlink() for f in Path(dir_tmp).glob(f"kmap*_{seed}_2.fits")]
 
 
 if __name__ == "__main__":
@@ -501,7 +505,7 @@ if __name__ == "__main__":
     psflag = "_nops" if nops else ""
 
     # Compute mask conversion factor
-    maskfac = 1 #get_maskfac(config)
+    maskfac = get_maskfac(config)
 
     # Add extra information
     config["pspec"].update({"mfsub": mfsub,
@@ -511,110 +515,169 @@ if __name__ == "__main__":
                             "dseed": dseed,
                             "gcmode": gcmode,
                             "maskfac": maskfac,
-                            "mask_lensrec": mask_lensrec})
+                            "mask_lensrec": mask_lensrec,
+                            "combine_mf": combine_mf})
 
     
     if args.xx:
         # Compute power spectra required for biased raw spectra (xxxx)
-        get_kmap(config, seed, ktype="xx", mapnum=1)
-        get_kmap(config, seed, ktype="xx", mapnum=2)
+        get_kmap(config, seed, ktype="xx", mapnum=1, bundleid=0)
+        get_kmap(config, seed, ktype="xx", mapnum=2, bundleid=0)
         
-        compute_cls(config, seed, ktype='xxxx')
+        compute_cls(config, seed, ktype='xxxx', bundleid1=0, bundleid2=0)
 
         # keep data and 10 sims for inspection, delete rest
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
 
     if args.N0:
         # Compute power spectra required for N0 (xyxy + xyyx)
-        get_kmap(config, seed, ktype="xy", mapnum=1)
-        get_kmap(config, seed, ktype="xy", mapnum=2)
-        get_kmap(config, seed, ktype="yx", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="xy", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="xy", mapnum=2, bundleid=bundleid)
+            get_kmap(config, seed, ktype="yx", mapnum=2, bundleid=bundleid)
 
-        compute_cls(config, seed, ktype="xyxy")
-        compute_cls(config, seed, ktype="xyyx")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue    
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="xyxy", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="xyyx", bundleid1=bundleid1, bundleid2=bundleid2)
 
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
 
     if args.RDN0:
         # Compute power spectra required for RDN0 (xdxd + xddx + dxdx + dxxd)
-        get_kmap(config, seed, ktype="xd", mapnum=1)
-        get_kmap(config, seed, ktype="xd", mapnum=2)
-        get_kmap(config, seed, ktype="dx", mapnum=1)
-        get_kmap(config, seed, ktype="dx", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="xd", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="xd", mapnum=2, bundleid=bundleid)
+            get_kmap(config, seed, ktype="dx", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="dx", mapnum=2, bundleid=bundleid)
            
-        compute_cls(config, seed, ktype="xdxd")
-        compute_cls(config, seed, ktype="xddx")
-        compute_cls(config, seed, ktype="dxxd")
-        compute_cls(config, seed, ktype="dxdx")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue        
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="xdxd", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="xddx", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="dxxd", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="dxdx", bundleid1=bundleid1, bundleid2=bundleid2)
 
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
 
     if args.curlRDN0:
         # Compute RDN0 for curl
-        get_kmap(config, seed, ktype="wd", mapnum=1)
-        get_kmap(config, seed, ktype="wd", mapnum=2)
-        get_kmap(config, seed, ktype="dw", mapnum=1)
-        get_kmap(config, seed, ktype="dw", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="wd", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="wd", mapnum=2, bundleid=bundleid)
+            get_kmap(config, seed, ktype="dw", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="dw", mapnum=2, bundleid=bundleid)
         
-        compute_cls(config, seed, ktype="wdwd")
-        compute_cls(config, seed, ktype="wddw")
-        compute_cls(config, seed, ktype="dwwd")
-        compute_cls(config, seed, ktype="dwdw")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue       
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="wdwd", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="wddw", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="dwwd", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="dwdw", bundleid1=bundleid1, bundleid2=bundleid2)
 
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
 
     if args.N1:
-        get_kmap(config, seed, ktype="ab", mapnum=1)
-        get_kmap(config, seed, ktype="ab", mapnum=2)
-        get_kmap(config, seed, ktype="ba", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="ab", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="ab", mapnum=2, bundleid=bundleid)
+            get_kmap(config, seed, ktype="ba", mapnum=2, bundleid=bundleid)
 
-        compute_cls(config, seed, ktype="abab")
-        compute_cls(config, seed, ktype="abba")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue       
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="abab", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="abba", bundleid1=bundleid1, bundleid2=bundleid2)
         
         if seed >= 11:
             cleanup(config, seed)
 
 
     if args.N1_sep:
-        get_kmap(config, seed, ktype='xy', mapnum=1, sep=True)
-        get_kmap(config, seed, ktype='xy', mapnum=2, sep=True)
-        get_kmap(config, seed, ktype='yx', mapnum=2, sep=True)
-        get_kmap(config, seed, ktype="ab", mapnum=1, sep=True)
-        get_kmap(config, seed, ktype="ab", mapnum=2, sep=True)
-        get_kmap(config, seed, ktype="ba", mapnum=2, sep=True)
+        get_kmap(config, seed, ktype='xy', mapnum=1)
+        get_kmap(config, seed, ktype='xy', mapnum=2)
+        get_kmap(config, seed, ktype='yx', mapnum=2)
+        get_kmap(config, seed, ktype="ab", mapnum=1)
+        get_kmap(config, seed, ktype="ab", mapnum=2)
+        get_kmap(config, seed, ktype="ba", mapnum=2)
             
-        compute_cls(config, seed, ktype="xyxy", sep=True)
-        compute_cls(config, seed, ktype="xyyx", sep=True)
-        compute_cls(config, seed, ktype="abab", sep=True)
-        compute_cls(config, seed, ktype="abba", sep=True)
+        compute_cls(config, seed, ktype="xyxy")
+        compute_cls(config, seed, ktype="xyyx")
+        compute_cls(config, seed, ktype="abab")
+        compute_cls(config, seed, ktype="abba")
         
         if seed >= 11:
-            cleanup(config, seed, sep=True)
+            cleanup(config, seed)
 
     if args.N0x:
         # Compute power spectra required for N0 (xyxy + xyyx)
-
-        get_kmap(config, seed, ktype="ay", mapnum=1)
-        get_kmap(config, seed, ktype="ay", mapnum=2)
-        get_kmap(config, seed, ktype="ya", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="ay", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="ay", mapnum=2, bundleid=bundleid)
+            get_kmap(config, seed, ktype="ya", mapnum=2, bundleid=bundleid)
         
-        compute_cls(config, seed, ktype="ayay")
-        compute_cls(config, seed, ktype="ayya")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue       
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="ayay", bundleid1=bundleid1, bundleid2=bundleid2)
+                    compute_cls(config, seed, ktype="ayya", bundleid1=bundleid1, bundleid2=bundleid2)
         
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
 
     if args.MF:
         # Compute power spectra of meanfield
-
-        get_kmap(config, seed, ktype="mf", mapnum=1)
-        get_kmap(config, seed, ktype="mf", mapnum=2)
+        for bundleid in range(nber_bundles):
+            get_kmap(config, seed, ktype="mf", mapnum=1, bundleid=bundleid)
+            get_kmap(config, seed, ktype="mf", mapnum=2, bundleid=bundleid)
         
-        compute_cls(config, seed, ktype="mfmf")
+        for bundleid1 in range(nber_bundles):
+            for bundleid2 in range(nber_bundles):
+                if bundleid1>bundleid2: 
+                    continue  
+                elif bundleid1==bundleid2 and not config['pspec']['auto']:
+                    continue
+                elif bundleid1<bundleid2 and not config['pspec']['cross']:
+                    continue
+                else:
+                    compute_cls(config, seed, ktype="mfmf", bundleid1=bundleid1, bundleid2=bundleid2)
 
         if seed >= 11:
-            cleanup(config, seed)
+            cleanup(config, seed, nber_bundles)
