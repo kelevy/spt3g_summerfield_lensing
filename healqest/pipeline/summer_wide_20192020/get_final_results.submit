@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=sapphire
 #SBATCH --account="punim1922"
-#SBATCH --output=batch_jobs_get_stacked_results/job.o%j
+#SBATCH --output=batch_jobs_get_final_results/job.o%j
 #SBATCH --time 0:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -14,7 +14,7 @@ nsims=248
 
 yaml=yaml/sqe/config_sqe_lensrec_summer-a_full_lminT500_lmaxT3000_mmin100.yaml
 
-python src/get_stacked_results.py $yaml --nsims $nsims --xx --N0 --RDN0 --N1_sep --curl
+python src/get_final_results.py $yaml --nsims $nsims --xx --N0 --RDN0 --N1_sep --curl
 
 my-job-stats -a -n -s
 
